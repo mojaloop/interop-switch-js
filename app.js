@@ -3,8 +3,9 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var bodyParser = require('body-parser')
 
-var indexRouter = require('./routes/index');
+var indexRouter = require('./src/routes/index');
 var app = express();
 
 // view engine setup
@@ -13,6 +14,7 @@ app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
+app.use(bodyParser.json({ type: req => req.headers['content-type'] === 'application/json' || req.headers['content-type'] === 'application/vnd.interoperability.transfers+json;version=1.0' }))
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
