@@ -85,7 +85,6 @@ const Db = require('./src/db')
 const Config = require('./src/lib/config')
 
 async function onListening() {
-  console.log(Config.DATABASE_URI)
   await Db.connect(Config.DATABASE_URI)
   var addr = server.address();
   var bind = typeof addr === 'string'
