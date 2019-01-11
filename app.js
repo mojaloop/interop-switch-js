@@ -7,6 +7,7 @@ var bodyParser = require('body-parser')
 
 var indexRouter = require('./src/routes/index');
 var app = express();
+const headerPattern = RegExp('^application\\/vnd.interoperability.(transfers|quotes|parties)\\+json;version=1.0')
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -14,7 +15,7 @@ app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(bodyParser.json({ type: req => req.headers['content-type'] === 'application/json' || req.headers['content-type'] === 'application/vnd.interoperability.transfers+json;version=1.0' }))
+app.use(bodyParser.json({ type: req => req.headers['content-type'] === 'application/json' || headerPattern.test(req.headers['content-type']) }))
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));

@@ -55,10 +55,14 @@ router.put('/quotes/:quote_id', async function(req, res, next) {
   Logger.debug('Received put quote request from ' + headers['fspiop-source'])
 
   const nextHop = await axios.get(config.ROUTING_ENDPOINT, { headers: { 'fspiop-final-destination': headers['fspiop-final-destination'] } })
-  const nextHopAddress = nextHop.destination
+  const nextHopAddress = nextHop.data.destination
   headers['fspiop-destination'] = nextHopAddress
 
-  const endpoint = await participant.getEndpoint(nextHopAddress, FSPIOP_CALLBACK_URL_QUOTE_PUT)
+  const endpointDataSet =  await participant.getEndpoint(nextHopAddress, FSPIOP_CALLBACK_URL_QUOTE_PUT)
+  const endpointTemplate = endpointDataSet[0].value
+  const endpoint = endpointTemplate.replace(/{{quoteId}}/gi, req.params.quote_id)
+
+  Logger.debug('Forwarding put quote onto ' + nextHopAddress, 'endpoint', endpoint)
 
   axios.put(endpoint, req.body, { headers })
 

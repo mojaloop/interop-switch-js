@@ -86,7 +86,6 @@ const addEndpoint = async (name, payload) => {
 const getEndpoint = async (name, type) => {
   try {
     const participant = await ParticipantModel.getByName(name)
-    console.log('name', name, 'participant', participant)
     participantExists(participant)
     const participantEndpoint = await ParticipantFacade.getEndpoint(participant.participantId, type)
     return participantEndpoint
