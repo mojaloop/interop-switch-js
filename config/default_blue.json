@@ -1,0 +1,20 @@
+{
+  "PORT": 2998,
+  "ENDPOINT_SOURCE_URL": "http://localhost:3001/participants/{{fsp}}/endpoints",
+  "ROUTING_ENDPOINT": "http://localhost:3001/nextHop",
+  "DATABASE_URI": "mysql://central_ledger:password@localhost:3306/central_ledger_blue_moja",
+  "PROVISIONED_PARTIES": [
+    {
+      "msisdn": "255222222222",
+      "fspId": "moja.tz.red.tzs.pink",
+      "currency": "USD",
+      "url": "http://localhost:6000"
+    },
+    {
+      "msisdn": "27111111111",
+      "fspId": "moja.za.blue.zar.green",
+      "currency": "USD",
+      "url": "http://localhost:6001"
+    }
+  ]
+}
