@@ -7,14 +7,12 @@
     {
       "msisdn": "255222222222",
       "fspId": "moja.tz.red.tzs.pink",
-      "currency": "USD",
-      "url": "http://localhost:6000"
+      "currency": "USD"
     },
     {
       "msisdn": "27111111111",
       "fspId": "moja.za.blue.zar.green",
-      "currency": "USD",
-      "url": "http://localhost:6001"
+      "currency": "USD"
     }
   ]
 }
