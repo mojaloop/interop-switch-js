@@ -6,6 +6,7 @@ const config = require('../lib/config')
 const Logger = require('@mojaloop/central-services-shared').Logger
 const FSPIOP_CALLBACK_URL_QUOTE_POST = 'FSPIOP_CALLBACK_URL_QUOTE_POST'
 const FSPIOP_CALLBACK_URL_QUOTE_PUT = 'FSPIOP_CALLBACK_URL_QUOTE_PUT'
+const FSPIOP_CALLBACK_URL_PARTIES_PUT = 'FSPIOP_CALLBACK_URL_PARTIES_PUT'
 
 
 const provisionedParties = new Map()
@@ -13,23 +14,29 @@ config.PROVISIONED_PARTIES.forEach(party => provisionedParties.set(party.msisdn,
 
 
 router.get('/parties/:type/:type_id', async function (req, res, next) {
-  const msisdn = req.params.type
+  const msisdn = req.params.type_id
   const destinationFsp = provisionedParties.get(msisdn)
   if(!destinationFsp) res.status(404).end()
-
-  const headers = Object.assign({}, req.headers, { 'fspiop-destination': destinationFsp.fspId})
-  await axios.get(`${destinationFsp.url}/parties/${req.param.type}/${req.param.type_id}`, { headers })
-
   res.status(202).end()
-})
 
-router.put('/parties/:type/:type_id', async function (req, res, next) {
-  const destinationAddress = req.headers['fspiop-destination']
-  const destinationFsp = accountLookup.get(destinationAddress)
-  const headers = Object.assign({}, req.headers, { 'fspiop-destination': destinationFsp.fspId})
-  await axios.put(`${destinationFsp.url}/parties/${req.param.type}/${req.param.type_id}`, { headers })
+  const source = req.headers['fspiop-source']
+  const endpointDataSet =  await participant.getEndpoint(source, FSPIOP_CALLBACK_URL_PARTIES_PUT)
+  const endpointTemplate = endpointDataSet[0].value
+  const endpoint = endpointTemplate.replace(/{{type}}/gi, 'msisdn').replace(/{{typeId}}/gi, msisdn)
 
-  res.status(200).end()
+  const headers = Object.assign({}, { 'fspiop-destination': destinationFsp.fspId, 'fspiop-source': destinationFsp.fspId, 'content-type': 'application/vnd.interoperability.parties+json;version=1.0' })
+  const response = {
+    party: {
+      partyIdInfo: {
+        partyIdType: 'msisdn',
+        partyIdentifier: msisdn,
+        fspId: destinationFsp.fspId
+      }
+    }
+  }
+
+  await axios.put(endpoint, response, { headers })
+
 })
 
 router.post('/quotes', async function(req, res, next) {
