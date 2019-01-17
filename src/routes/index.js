@@ -10,7 +10,14 @@ const FSPIOP_CALLBACK_URL_PARTIES_PUT = 'FSPIOP_CALLBACK_URL_PARTIES_PUT'
 
 
 const provisionedParties = new Map()
-config.PROVISIONED_PARTIES.forEach(party => provisionedParties.set(party.msisdn, party))
+let data
+if ( typeof config.PROVISIONED_PARTIES === "string") {
+  data = JSON.parse(config.PROVISIONED_PARTIES)
+}
+else {
+  data = config.PROVISIONED_PARTIES
+}
+data.forEach(party => provisionedParties.set(party.msisdn, party))
 
 
 router.get('/parties/:type/:type_id', async function (req, res, next) {
