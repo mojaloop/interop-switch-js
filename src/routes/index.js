@@ -55,7 +55,7 @@ router.post('/quotes', async function(req, res, next) {
     'fspiop-destination' : req.headers['fspiop-destination'],
     'fspiop-source' : req.headers['fspiop-source'],
     'date' : req.headers['date'],
-    'Content-Type': req.headers['Content-Type'],
+    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0",
     'Accept' : req.headers['Accept'],
     'cache-control' : req.headers['cache-control']
   }
@@ -78,8 +78,7 @@ router.put('/quotes/:quote_id', async function(req, res, next) {
     'fspiop-destination' : req.headers['fspiop-destination'],
     'fspiop-source' : req.headers['fspiop-source'],
     'date' : req.headers['date'],
-    'Content-Type': req.headers['Content-Type'],
-    'Accept' : req.headers['Accept'],
+    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0",
     'cache-control' : req.headers['cache-control']
   }
 
