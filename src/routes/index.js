@@ -70,7 +70,10 @@ router.post('/quotes', async function(req, res, next) {
   const endpoint = endpointDataSet[0].value
 
   Logger('Forwarding post quote onto ' + nextHopAddress, 'endpoint', endpoint)
-  axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
+  // axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
+
+  //TODO hardcode the endpoint for now
+  axios.post("http://cnp-operator.openafrica.network/blue/quotes", req.body, {headers}).catch(error => Logger("Error posting", error))
 
 });
 
