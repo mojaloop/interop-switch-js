@@ -59,7 +59,7 @@ router.post('/quotes', async function(req, res, next) {
   const endpoint = endpointDataSet[0].value
 
   Logger('Forwarding post quote onto ' + nextHopAddress, 'endpoint', endpoint)
-  axios.post(endpoint, req.body, { headers })
+  axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
 
 });
 
@@ -75,10 +75,9 @@ router.put('/quotes/:quote_id', async function(req, res, next) {
   const endpointDataSet =  await participant.getEndpoint(nextHopAddress, FSPIOP_CALLBACK_URL_QUOTE_PUT)
   const endpointTemplate = endpointDataSet[0].value
   const endpoint = endpointTemplate.replace(/{{quoteId}}/gi, req.params.quote_id)
-
   Logger('Forwarding put quote onto ' + nextHopAddress, 'endpoint', endpoint)
 
-  axios.put(endpoint, req.body, { headers })
+  axios.put(endpoint, req.body, { headers }).catch(error => Logger("Error putting", error))
 
   res.status(200).end()
 })
