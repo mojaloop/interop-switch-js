@@ -55,9 +55,7 @@ router.post('/quotes', async function(req, res, next) {
     'fspiop-destination' : req.headers['fspiop-destination'],
     'fspiop-source' : req.headers['fspiop-source'],
     'date' : req.headers['date'],
-    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0",
-    'Accept' : req.headers['Accept'],
-    'cache-control' : req.headers['cache-control']
+    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0"
   }
 
   const nextHop = await axios.get(config.ROUTING_ENDPOINT, { headers: { 'fspiop-final-destination': headers['fspiop-final-destination'] } })
@@ -67,7 +65,8 @@ router.post('/quotes', async function(req, res, next) {
   const endpoint = endpointDataSet[0].value
 
   Logger('Forwarding post quote onto ' + nextHopAddress, 'endpoint', endpoint)
-  await axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
+  let response  = await axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
+  Logger('Response from forwarding post', response)
 });
 
 router.put('/quotes/:quote_id', async function(req, res, next) {
@@ -78,8 +77,7 @@ router.put('/quotes/:quote_id', async function(req, res, next) {
     'fspiop-destination' : req.headers['fspiop-destination'],
     'fspiop-source' : req.headers['fspiop-source'],
     'date' : req.headers['date'],
-    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0",
-    'cache-control' : req.headers['cache-control']
+    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0"
   }
 
   const nextHop = await axios.get(config.ROUTING_ENDPOINT, { headers: { 'fspiop-final-destination': headers['fspiop-final-destination'] } })
