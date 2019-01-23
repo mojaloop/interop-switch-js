@@ -46,21 +46,19 @@ router.get('/parties/:type/:type_id', async function (req, res, next) {
 
 })
 
-router.get('/test', async function(req, res, next) {
-
-  let url = req.query.url
-
-  Logger('Make get test to', url)
-  let response = await axios.post("http://cnp-operator.openafrica.network/blue/quotes", {}).catch(error => console.log("Error posting", error))
-  console.log(response)
-  res.send()
-});
-
 router.post('/quotes', async function(req, res, next) {
-  let headers = Object.assign({}, req.headers)
-  if (!headers['fspiop-final-destination']) headers['fspiop-final-destination'] = headers['fspiop-destination']
-  Logger('Received post quote request from ' + headers['fspiop-source'])
+  Logger('Received post quote request from ' + req.headers['fspiop-source'])
   res.status(202).end()
+
+  let headers = {
+    'fspiop-final-destination': req.headers['fspiop-final-destination'] ? req.headers['fspiop-final-destination'] : req.headers['fspiop-destination'],
+    'fspiop-destination' : req.headers['fspiop-destination'],
+    'fspiop-source' : req.headers['fspiop-source'],
+    'date' : req.headers['date'],
+    'Content-Type': req.headers['Content-Type'],
+    'Accept' : req.headers['Accept'],
+    'cache-control' : req.headers['cache-control']
+  }
 
   const nextHop = await axios.get(config.ROUTING_ENDPOINT, { headers: { 'fspiop-final-destination': headers['fspiop-final-destination'] } })
   const nextHopAddress = nextHop.data.destination
@@ -69,20 +67,21 @@ router.post('/quotes', async function(req, res, next) {
   const endpoint = endpointDataSet[0].value
 
   Logger('Forwarding post quote onto ' + nextHopAddress, 'endpoint', endpoint)
-  // axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
-
-  //TODO hardcode the endpoint for now
-  Logger('with Only Body')
-  await axios.post("http://cnp-operator.openafrica.network/blue/quotes", req.body).catch(error => Logger("Error posting", error))
-  Logger('with Only Headers')
-  await axios.post("http://cnp-operator.openafrica.network/blue/quotes", {}, {headers}).catch(error => Logger("Error posting", error))
-
+  await axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
 });
 
 router.put('/quotes/:quote_id', async function(req, res, next) {
-  let headers = Object.assign({}, req.headers)
-  if (!headers['fspiop-final-destination']) headers['fspiop-final-destination'] = headers['fspiop-destination']
-  Logger('Received put quote request from ' + headers['fspiop-source'])
+  Logger('Received put quote request from ' + req.headers['fspiop-source'])
+
+  let headers = {
+    'fspiop-final-destination': req.headers['fspiop-final-destination'] ? req.headers['fspiop-final-destination'] : req.headers['fspiop-destination'],
+    'fspiop-destination' : req.headers['fspiop-destination'],
+    'fspiop-source' : req.headers['fspiop-source'],
+    'date' : req.headers['date'],
+    'Content-Type': req.headers['Content-Type'],
+    'Accept' : req.headers['Accept'],
+    'cache-control' : req.headers['cache-control']
+  }
 
   const nextHop = await axios.get(config.ROUTING_ENDPOINT, { headers: { 'fspiop-final-destination': headers['fspiop-final-destination'] } })
   const nextHopAddress = nextHop.data.destination
