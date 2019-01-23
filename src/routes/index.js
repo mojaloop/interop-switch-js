@@ -72,7 +72,10 @@ router.post('/quotes', async function(req, res, next) {
   // axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
 
   //TODO hardcode the endpoint for now
-  axios.post("http://cnp-operator.openafrica.network/blue/quotes", {}).catch(error => Logger("Error posting", error))
+  Logger('with Only Body')
+  await axios.post("http://cnp-operator.openafrica.network/blue/quotes", req.body).catch(error => Logger("Error posting", error))
+  Logger('with Only Headers')
+  await axios.post("http://cnp-operator.openafrica.network/blue/quotes", {}, {headers}).catch(error => Logger("Error posting", error))
 
 });
 
