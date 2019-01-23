@@ -51,10 +51,9 @@ router.get('/test', async function(req, res, next) {
   let url = req.query.url
 
   Logger('Make get test to', url)
-  let response = await axios.post(url, {}).catch(error => Logger("Error posting", error))
-
-  let data = response.data ? response.data : ''
-  res.send(data)
+  let response = await axios.post("http://cnp-operator.openafrica.network/blue/quotes", {}).catch(error => console.log("Error posting", error))
+  console.log(response)
+  res.send()
 });
 
 router.post('/quotes', async function(req, res, next) {
