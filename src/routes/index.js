@@ -46,6 +46,17 @@ router.get('/parties/:type/:type_id', async function (req, res, next) {
 
 })
 
+router.get('/test', async function(req, res, next) {
+
+  let url = req.query.url
+
+  Logger('Make get test to', url)
+  let response = await axios.get(url).catch(error => Logger("Error posting", error))
+
+  let data = response.data ? response.data : ''
+  res.send(data)
+});
+
 router.post('/quotes', async function(req, res, next) {
   let headers = Object.assign({}, req.headers)
   if (!headers['fspiop-final-destination']) headers['fspiop-final-destination'] = headers['fspiop-destination']
