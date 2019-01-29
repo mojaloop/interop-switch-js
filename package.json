@@ -1,0 +1,27 @@
+{
+  "name": "interop-switch-js",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@mojaloop/central-services-database": "3.1.0-snapshot",
+    "@mojaloop/central-services-shared": "4.1.0-snapshot",
+    "axios": "^0.18.0",
+    "body-parser": "^1.18.3",
+    "catbox": "^10.0.6",
+    "catbox-memory": "^4.0.1",
+    "cookie-parser": "~1.4.3",
+    "debug": "^2.6.9",
+    "express": "~4.16.0",
+    "http-errors": "~1.6.2",
+    "immutable": "^4.0.0-rc.12",
+    "knex": "^0.16.3",
+    "morgan": "~1.9.0",
+    "mustache": "^3.0.1",
+    "pug": "2.0.0-beta11",
+    "rc": "^1.2.8",
+    "request": "^2.88.0"
+  }
+}
