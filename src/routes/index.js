@@ -43,7 +43,6 @@ router.get('/parties/:type/:type_id', async function (req, res, next) {
   }
 
   await axios.put(endpoint, response, { headers })
-
 })
 
 router.post('/quotes', async function(req, res, next) {
@@ -51,16 +50,19 @@ router.post('/quotes', async function(req, res, next) {
   res.status(202).end()
 
   let headers = {
-    'fspiop-final-destination': req.headers['fspiop-final-destination'] ? req.headers['fspiop-final-destination'] : req.headers['fspiop-destination'],
+    'fspiop-account': req.headers['fspiop-account'],
     'fspiop-destination' : req.headers['fspiop-destination'],
     'fspiop-source' : req.headers['fspiop-source'],
     'date' : req.headers['date'],
     'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0"
   }
 
-  const nextHop = await axios.get(config.ROUTING_ENDPOINT, { headers: { 'fspiop-final-destination': headers['fspiop-final-destination'] } })
-  const nextHopAddress = nextHop.data.destination
-  headers['fspiop-destination'] = nextHopAddress
+  // Alter header for Out Of Network Request
+  if(req.headers['fspiop-account']) {
+    const nextHop = await axios.get(config.ROUTING_ENDPOINT + '/' + req.headers['fspiop-account'])
+    headers['fspiop-destination'] = nextHop.data.address
+  }
+ 
   const endpointDataSet =  await participant.getEndpoint(nextHopAddress, FSPIOP_CALLBACK_URL_QUOTE_POST)
   const endpoint = endpointDataSet[0].value
 
@@ -73,16 +75,18 @@ router.put('/quotes/:quote_id', async function(req, res, next) {
   Logger('Received put quote request from ' + req.headers['fspiop-source'])
 
   let headers = {
-    'fspiop-final-destination': req.headers['fspiop-final-destination'] ? req.headers['fspiop-final-destination'] : req.headers['fspiop-destination'],
+    'fspiop-account': req.headers['fspiop-account'],
     'fspiop-destination' : req.headers['fspiop-destination'],
     'fspiop-source' : req.headers['fspiop-source'],
     'date' : req.headers['date'],
     'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0"
   }
 
-  const nextHop = await axios.get(config.ROUTING_ENDPOINT, { headers: { 'fspiop-final-destination': headers['fspiop-final-destination'] } })
-  const nextHopAddress = nextHop.data.destination
-  headers['fspiop-destination'] = nextHopAddress
+   // Alter header for Out Of Network Request
+   if(req.headers['fspiop-account']) {
+    const nextHop = await axios.get(config.ROUTING_ENDPOINT + '/' + req.headers['fspiop-account'])
+    headers['fspiop-destination'] = nextHop.data.address
+  }
 
   const endpointDataSet =  await participant.getEndpoint(nextHopAddress, FSPIOP_CALLBACK_URL_QUOTE_PUT)
   const endpointTemplate = endpointDataSet[0].value
