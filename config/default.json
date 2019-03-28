@@ -1,10 +1,9 @@
 {
   "PORT": 3000,
   "ENDPOINTS_ENDPOINT": "http://central-ledger.local",
-  "ROUTING_ENDPOINT": "http://localhost:3001/nextHop",
   "ROUTING_ENDPOINTS": {
     "USD": "http://usd.routing.local",
-    "XOF": "http://localhost:3011"
+    "XOF": "http://xof.routing.local"
   },
   "PROVISIONED_PARTIES": [
     {
