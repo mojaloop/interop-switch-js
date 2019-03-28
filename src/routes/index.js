@@ -1,7 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios')
-const participant = require('../domain/participant/index')
 const config = require('../lib/config')
 const Logger = require('debug')('interop-switch-js')
 const FSPIOP_CALLBACK_URL_QUOTE_POST = 'FSPIOP_CALLBACK_URL_QUOTE_POST'
@@ -19,83 +18,102 @@ else {
 }
 data.forEach(party => provisionedParties.set(party.msisdn, party))
 
+const getEndpointByType = async (fspId, type) => {
+  return axios.get(`${config.ENDPOINTS_ENDPOINT}/participants/${fspId}/endpoints`).then((response) => {
+    const endpoints = response.data.filter((URL) => URL.type === type)
+    return endpoints ? endpoints[0] : null
+  }).catch(error => Logger(`error getting endpoint type for source:\t${fspId}\ttype${type}`))
+}
 
+/**
+ * Mocking an ALS by using the config
+ */
 router.get('/parties/:type/:type_id', async function (req, res, next) {
   const msisdn = req.params.type_id
   const destinationFsp = provisionedParties.get(msisdn)
-  if(!destinationFsp) res.status(404).end()
+  if(!destinationFsp) {
+    res.status(404).end()
+    return
+  }
   res.status(202).end()
 
+  // Determine who to send the parties back to
   const source = req.headers['fspiop-source']
-  const endpointDataSet =  await participant.getEndpoint(source, FSPIOP_CALLBACK_URL_PARTIES_PUT)
-  const endpointTemplate = endpointDataSet[0].value
-  const endpoint = endpointTemplate.replace(/{{type}}/gi, 'msisdn').replace(/{{typeId}}/gi, msisdn)
-
-  const headers = Object.assign({}, { 'fspiop-destination': destinationFsp.fspId, 'fspiop-source': destinationFsp.fspId, 'content-type': 'application/vnd.interoperability.parties+json;version=1.0' })
-  const response = {
-    party: {
-      partyIdInfo: {
-        partyIdType: 'msisdn',
-        partyIdentifier: msisdn,
-        fspId: destinationFsp.fspId
+  const endpointDataSet = await getEndpointByType(source, FSPIOP_CALLBACK_URL_PARTIES_PUT)
+  if (endpointDataSet) {
+    const endpointTemplate = endpointDataSet.value
+    const endpoint = endpointTemplate.replace(/{{type}}/gi, 'msisdn').replace(/{{typeId}}/gi, msisdn)
+    console.log(endpoint)
+  
+    const headers = Object.assign({}, { 'fspiop-destination': source, 'fspiop-source': 'switch', 'content-type': 'application/vnd.interoperability.parties+json;version=1.0' })
+    const response = {
+      party: {
+        partyIdInfo: {
+          partyIdType: 'msisdn',
+          partyIdentifier: msisdn,
+          fspId: destinationFsp.fspId,
+          partySubIdOrType: destinationFsp.partySubIdOrType
+        }
       }
     }
+  
+    await axios.put(endpoint, response, { headers })
   }
-
-  await axios.put(endpoint, response, { headers })
 })
 
-router.post('/quotes', async function(req, res, next) {
+router.post('/quotes', async function (req, res, next) {
   Logger('Received post quote request from ' + req.headers['fspiop-source'])
   res.status(202).end()
 
   let headers = {
-    'fspiop-account': req.headers['fspiop-account'],
-    'fspiop-destination' : req.headers['fspiop-destination'],
-    'fspiop-source' : req.headers['fspiop-source'],
-    'date' : req.headers['date'],
+    'fspiop-destination': req.headers['fspiop-destination'],
+    'fspiop-source': req.headers['fspiop-source'],
+    'date': req.headers['date'],
     'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0"
   }
 
-  // Alter header for Out Of Network Request
-  if(req.headers['fspiop-account']) {
-    const nextHop = await axios.get(config.ROUTING_ENDPOINT + '/' + req.headers['fspiop-account'])
-    headers['fspiop-destination'] = nextHop.data.address
-  }
- 
-  const endpointDataSet =  await participant.getEndpoint(nextHopAddress, FSPIOP_CALLBACK_URL_QUOTE_POST)
-  const endpoint = endpointDataSet[0].value
+  const { payee, transferCurrency } = req.body
 
-  Logger('Forwarding post quote onto ' + nextHopAddress, 'endpoint', endpoint)
-  let response  = await axios.post(endpoint, req.body, { headers }).catch(error => Logger("Error posting", error))
-  Logger('Response from forwarding post', response)
+  // Alter header for Out Of Network Request
+  if (payee.partyIdInfo.partySubIdOrType) {
+    const currencyRouteEndpoint = config.ROUTING_ENDPOINTS[transferCurrency]
+    axios.get(`${currencyRouteEndpoint}/peers?destinationAddress=${payee.partyIdInfo.partySubIdOrType}`).then(async response => {
+      const peer = response.data[0]
+      Logger('nexthop is ', peer.id)
+      headers['fspiop-destination'] = peer.id
+      const endpoint = await getEndpointByType(peer.id, FSPIOP_CALLBACK_URL_QUOTE_POST)
+      if(endpoint) {
+        Logger('Forwarding post quote onto ' + peer.id, 'endpoint', endpoint)
+        let response = await axios.post(endpoint.value, req.body, { headers }).catch(error => Logger("Error posting", error))
+        Logger('Response from forwarding post', response)
+      } else {
+        Logger(`Could not get endpoint for peer:\t${peer.id}and endpoint:\t${FSPIOP_CALLBACK_URL_QUOTE_POST}`)
+      }
+    }).catch(error => Logger('error getting next peer from routing service', error))
+  }
 });
 
 router.put('/quotes/:quote_id', async function(req, res, next) {
   Logger('Received put quote request from ' + req.headers['fspiop-source'])
 
   let headers = {
-    'fspiop-account': req.headers['fspiop-account'],
     'fspiop-destination' : req.headers['fspiop-destination'],
     'fspiop-source' : req.headers['fspiop-source'],
     'date' : req.headers['date'],
     'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0"
   }
 
-   // Alter header for Out Of Network Request
-   if(req.headers['fspiop-account']) {
-    const nextHop = await axios.get(config.ROUTING_ENDPOINT + '/' + req.headers['fspiop-account'])
-    headers['fspiop-destination'] = nextHop.data.address
-  }
+   const endpoint = await getEndpointByType(peer.id, FSPIOP_CALLBACK_URL_QUOTE_PUT)
+   if(endpoint) {
+      const endpointTemplate = endpoint.value
+      const endpointURL = endpointTemplate.replace(/{{quoteId}}/gi, req.params.quote_id)
+      axios.put(endpointURL, req.body, { headers }).catch(error => Logger("Error putting", error))
+      res.status(200).end()
+   } else {
+     Logger('Could not find endpoint to proxy the QUOTE PUT request')
+     res.status(404).end()
+   }
 
-  const endpointDataSet =  await participant.getEndpoint(nextHopAddress, FSPIOP_CALLBACK_URL_QUOTE_PUT)
-  const endpointTemplate = endpointDataSet[0].value
-  const endpoint = endpointTemplate.replace(/{{quoteId}}/gi, req.params.quote_id)
-  Logger('Forwarding put quote onto ' + nextHopAddress, 'endpoint', endpoint)
-
-  axios.put(endpoint, req.body, { headers }).catch(error => Logger("Error putting", error))
-
-  res.status(200).end()
 })
 
 

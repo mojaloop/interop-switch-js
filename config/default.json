@@ -1,13 +1,17 @@
 {
   "PORT": 3000,
-  "ENDPOINT_SOURCE_URL": "http://localhost:3001/participants/{{fsp}}/endpoints",
+  "ENDPOINTS_ENDPOINT": "http://central-ledger.local",
   "ROUTING_ENDPOINT": "http://localhost:3001/nextHop",
-  "DATABASE_URI": "mysql://central_ledger:password@localhost:3306/central_ledger_blue_moja",
+  "ROUTING_ENDPOINTS": {
+    "USD": "http://usd.routing.local",
+    "XOF": "http://localhost:3011"
+  },
   "PROVISIONED_PARTIES": [
     {
       "msisdn": "255222222222",
-      "fspId": "moja.tz.red.tzs.pink",
-      "currency": "USD"
+      "fspId": "red-mobile",
+      "currency": "USD",
+      "partySubIdOrType": "moja.mowali.xof.red"
     },
     {
       "msisdn": "27111111111",
