@@ -15,7 +15,8 @@
     },
     {
       "msisdn": "27111111111",
-      "fspId": "moja.za.blue.zar.green",
+      "fspId": "blue-mobile",
+      "partySubIdOrType": "moja.mowali.usd.blue",
       "currency": "USD"
     }
   ]
