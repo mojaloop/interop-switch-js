@@ -5,6 +5,7 @@
     "USD": "http://usd.routing.local",
     "XOF": "http://xof.routing.local"
   },
+  "TRANSFER_ENDPOINTS_BASE_URL": "http://ml-api-adapter.local",
   "PROVISIONED_PARTIES": [
     {
       "msisdn": "255222222222",

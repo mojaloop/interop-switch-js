@@ -119,6 +119,21 @@ router.put('/quotes/:quote_id', async function(req, res, next) {
 
 })
 
+// Pass transfer requests straight onto ml-api-adatper. Done for convenience so that only one url needs to be registered.
+router.post('/transfers', async function (req, res, next) {
+  Logger('Received post transfer request from ' + req.headers['fspiop-source'] + '. Forwarding on to ml-api-adapter')
 
+  axios.post(`${config.TRANSFER_ENDPOINTS_BASE_URL}/transfers`, req.body, { headers: req.headers })
+
+  res.status(202).end()
+})
+
+router.put('/transfers/:transfer_id', async function (req, res, next) {
+  Logger('Received put transfer request from ' + req.headers['fspiop-source'] + '. Forwarding on to ml-api-adapter')
+
+  axios.put(`${config.TRANSFER_ENDPOINTS_BASE_URL}/transfers/${req.params.transfer_id}`, req.body, { headers: req.headers })
+
+  res.status(202).end()
+})
 
 module.exports = router;
