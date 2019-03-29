@@ -69,7 +69,8 @@ router.post('/quotes', async function (req, res, next) {
     'fspiop-destination': req.headers['fspiop-destination'],
     'fspiop-source': req.headers['fspiop-source'],
     'date': req.headers['date'],
-    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0"
+    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0",
+    'Accept': "application/vnd.interoperability.quotes+json;version=1.0"
   }
 
   const { payee, transferCurrency } = req.body
@@ -77,6 +78,7 @@ router.post('/quotes', async function (req, res, next) {
   // Alter header for Out Of Network Request
   if (payee.partyIdInfo.partySubIdOrType) {
     const currencyRouteEndpoint = config.ROUTING_ENDPOINTS[transferCurrency]
+    console.log(config.ROUTING_ENDPOINTS, currencyRouteEndpoint, transferCurrency)
     axios.get(`${currencyRouteEndpoint}/peers?destinationAddress=${payee.partyIdInfo.partySubIdOrType}`).then(async response => {
       const peer = response.data[0]
       Logger('nexthop is ', peer.id)
@@ -100,10 +102,11 @@ router.put('/quotes/:quote_id', async function(req, res, next) {
     'fspiop-destination' : req.headers['fspiop-destination'],
     'fspiop-source' : req.headers['fspiop-source'],
     'date' : req.headers['date'],
-    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0"
+    'Content-Type': "application/vnd.interoperability.quotes+json;version=1.0",
+    'Accept': "application/vnd.interoperability.quotes+json;version=1.0"
   }
 
-   const endpoint = await getEndpointByType(peer.id, FSPIOP_CALLBACK_URL_QUOTE_PUT)
+   const endpoint = await getEndpointByType(headers['fspiop-destination'], FSPIOP_CALLBACK_URL_QUOTE_PUT)
    if(endpoint) {
       const endpointTemplate = endpoint.value
       const endpointURL = endpointTemplate.replace(/{{quoteId}}/gi, req.params.quote_id)
