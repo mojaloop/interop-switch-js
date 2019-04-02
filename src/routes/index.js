@@ -121,19 +121,49 @@ router.put('/quotes/:quote_id', async function(req, res, next) {
 
 // Pass transfer requests straight onto ml-api-adatper. Done for convenience so that only one url needs to be registered.
 router.post('/transfers', async function (req, res, next) {
-  Logger('Received post transfer request from ' + req.headers['fspiop-source'] + '. Forwarding on to ml-api-adapter')
+  try {
+    Logger('Received post transfer request from ' + req.headers['fspiop-source'] + '. Forwarding on to ml-api-adapter')
+    let headers = {
+      'fspiop-destination' : req.headers['fspiop-destination'],
+      'fspiop-source' : req.headers['fspiop-source'],
+      'date' : req.headers['date'],
+      'Content-Type': "application/vnd.interoperability.transfers+json;version=1.0",
+      'Accept': "application/vnd.interoperability.transfers+json;version=1.0"
+    }
 
-  axios.post(`${config.TRANSFER_ENDPOINTS_BASE_URL}/transfers`, req.body, { headers: req.headers })
+    await axios.post(`${config.TRANSFER_ENDPOINTS_BASE_URL}/transfers`, req.body, { headers }).catch(error => {
+      Logger('Error forwarding transfer post request: ' + JSON.stringify(error))
+      throw error
+    })
 
-  res.status(202).end()
+    res.status(202).end()
+  } catch (error) {
+    Logger('Error forwarding transfer post request: ' + JSON.stringify(error))
+    res.status(400).end()
+  }
 })
 
 router.put('/transfers/:transfer_id', async function (req, res, next) {
-  Logger('Received put transfer request from ' + req.headers['fspiop-source'] + '. Forwarding on to ml-api-adapter')
+  try {
+    Logger('Received put transfer request from ' + req.headers['fspiop-source'] + '. Forwarding on to ml-api-adapter')
+    let headers = {
+      'fspiop-destination' : req.headers['fspiop-destination'],
+      'fspiop-source' : req.headers['fspiop-source'],
+      'date' : req.headers['date'],
+      'Content-Type': "application/vnd.interoperability.transfers+json;version=1.0",
+      'Accept': "application/vnd.interoperability.transfers+json;version=1.0"
+    }
 
-  axios.put(`${config.TRANSFER_ENDPOINTS_BASE_URL}/transfers/${req.params.transfer_id}`, req.body, { headers: req.headers })
+    await axios.put(`${config.TRANSFER_ENDPOINTS_BASE_URL}/transfers/${req.params.transfer_id}`, req.body, { headers }).catch(error => {
+      Logger('Error forwarding transfer post request: ' + JSON.stringify(error))
+      throw error
+    })
 
-  res.status(202).end()
+    res.status(202).end()
+  } catch (error) {
+    Logger('Error forwarding transfer put request: ' + JSON.stringify(error))
+    res.status(400).end()
+  }
 })
 
 module.exports = router;
