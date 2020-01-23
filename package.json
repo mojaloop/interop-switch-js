@@ -9,7 +9,7 @@
   "dependencies": {
     "@mojaloop/central-services-database": "3.1.0-snapshot",
     "@mojaloop/central-services-shared": "4.1.0-snapshot",
-    "axios": "^0.18.0",
+    "axios": "^0.18.1",
     "body-parser": "^1.18.3",
     "catbox": "^10.0.6",
     "catbox-memory": "^4.0.1",
