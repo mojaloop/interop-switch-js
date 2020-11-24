@@ -1,3 +1,12 @@
+# [DEPRECATED] interop-switch-js
+
+## Deprecation Notice
+
+Theis repo was deprecated as of November 2020. It is no longer maintained, and is no longer referenced by any releases of Mojaloop.
+
+For a list of active Mojaloop repos, please refer to [Repo Details](https://docs.mojaloop.io/documentation/repositories/) section of the Mojaloop documentation.
+
+
 Experimental Javascript implementation of the Interop-Switch component.
 Developed for use with the cross-network POC (Reference).
 
